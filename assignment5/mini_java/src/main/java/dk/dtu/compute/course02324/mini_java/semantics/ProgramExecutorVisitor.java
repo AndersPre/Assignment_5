@@ -13,26 +13,6 @@ import static dk.dtu.compute.course02324.mini_java.utils.Shortcuts.FLOAT;
 import static dk.dtu.compute.course02324.mini_java.utils.Shortcuts.INT;
 import static java.util.Map.entry;
 
-/*
-    ProgramExecutorVisitor
-
-     Map<Expression, Number> values:
-      Represents the current (!) value for each subexpression.
-
-
-    Interesting methods for:
-     Statement
-     Declaration
-     Literal
-     Variable
-     Assignment
-     OperatorExpression
-*/
-
-
-
-
-
 public class ProgramExecutorVisitor extends ProgramVisitor {
 
     final private ProgramTypeVisitor pv;
@@ -40,28 +20,75 @@ public class ProgramExecutorVisitor extends ProgramVisitor {
     final public Map<Expression, Number> values = new HashMap<>();
 
     private Function<List<Number>,Number> plus2int =
-            args ->
-            { int arg1 = args.get(0).intValue();
+            args -> { int arg1 = args.get(0).intValue();
                       int arg2 = args.get(1).intValue();
                       return arg1 + arg2; };
 
     private Function<List<Number>,Number> plus2float =
-            args ->
-            { float arg1 = args.get(0).floatValue();
+            args -> { float arg1 = args.get(0).floatValue();
                       float arg2 = args.get(1).floatValue();
                       return arg1 + arg2; };
 
     private Function<List<Number>,Number> minus2float =
-            args ->
-            { float arg1 = args.get(0).floatValue();
+            args -> { float arg1 = args.get(0).floatValue();
                 float arg2 = args.get(1).floatValue();
                 return arg1 - arg2; };
 
     private Function<List<Number>,Number> multfloat =
-            args ->
-            { float arg1 = args.get(0).floatValue();
+            args -> { float arg1 = args.get(0).floatValue();
                 float arg2 = args.get(1).floatValue();
                 return arg1 * arg2; };
+
+    //Added for assignment
+
+    private Function<List<Number>,Number> minus2int =
+            args -> {
+                int arg1 = args.get(0).intValue();
+                int arg2 = args.get(1).intValue();
+                return arg1 - arg2;};
+    private Function<List<Number>,Number> multint =
+            args -> {
+                int arg1 = args.get(0).intValue();
+                int arg2 = args.get(1).intValue();
+                return arg1 * arg2;
+            };
+    private Function<List<Number>,Number> divint =
+            args -> {
+                int arg1 = args.get(0).intValue();
+                int arg2 = args.get(1).intValue();
+                return arg1 / arg2;
+            };
+    private Function<List<Number>,Number> divfloat =
+            args -> {
+                float arg1 = args.get(0).floatValue();
+                float arg2 = args.get(1).floatValue();
+                return arg1 / arg2;
+            };
+    private Function<List<Number>,Number> modint =
+            args -> {
+                int arg1 = args.get(0).intValue();
+                int arg2 = args.get(1).intValue();
+                return arg1 % arg2;
+            };
+    private Function<List<Number>,Number> modfloat =
+            args -> {
+                float arg1 = args.get(0).floatValue();
+                float arg2 = args.get(1).floatValue();
+                return arg1 % arg2;
+            };
+    private Function<List<Number>,Number> plus1 =
+            args -> args.get(0);
+    private Function<List<Number>,Number> minus1int =
+            args -> -args.get(0).intValue();
+    private Function<List<Number>,Number> minus1float =
+            args -> -args.get(0).floatValue();
+
+
+
+
+
+
+
 
     /**
      * The map below associates each operator for each possible type with a function
@@ -72,19 +99,37 @@ public class ProgramExecutorVisitor extends ProgramVisitor {
      *      (all operations with the respective types required in assignment must be defined above
      *      and added to the mapping below).
      */
-
-    
     final private Map<Operator, Map<Type, Function<List<Number>,Number>>> operatorFunctions = Map.ofEntries(
-            entry(PLUS2, Map.ofEntries
-                    (entry(INT, plus2int),
-                     entry(FLOAT, plus2float) )
-            ),
-            entry(MINUS2, Map.ofEntries
-                    (entry(FLOAT, minus2float) )
-            ),
-            entry(MULT, Map.ofEntries
-                    (entry(FLOAT, multfloat) )
-            ));
+            entry(PLUS2, Map.ofEntries(
+                    entry(INT, plus2int),
+                    entry(FLOAT, plus2float)
+            )),
+            entry(MINUS2, Map.ofEntries(
+                    entry(INT, minus2int),
+                    entry(FLOAT, minus2float)
+            )),
+            entry(MULT, Map.ofEntries(
+                    entry(INT, multint),
+                    entry(FLOAT, multfloat)
+            )),
+            entry(DIV, Map.ofEntries(
+                    entry(INT, divint),
+                    entry(FLOAT, divfloat)
+            )),
+            entry(MOD, Map.ofEntries(
+                    entry(INT, modint),
+                    entry(FLOAT, modfloat)
+            )),
+            entry(PLUS1, Map.ofEntries(
+                    entry(INT, plus1),
+                    entry(FLOAT, plus1)
+            )),
+            entry(MINUS1, Map.ofEntries(
+                    entry(INT, minus1int),
+                    entry(FLOAT, minus1float)
+            ))
+    );
+
 
     public ProgramExecutorVisitor(ProgramTypeVisitor pv) {
         this.pv = pv;
@@ -120,11 +165,25 @@ public class ProgramExecutorVisitor extends ProgramVisitor {
                 expression.
          */
 
+        Number value = values.get(printStatement.expression);
+        System.out.println(printStatement.prefix + value);
+
+
     }
 
     @Override
     public void visit(WhileLoop whileLoop) {
         whileLoop.expression.accept(this);
+        Number value = values.get(whileLoop.expression);
+
+        while (value.intValue() >= 0) {
+
+            whileLoop.statement.accept(this);
+
+            whileLoop.expression.accept(this);
+            value = values.get(whileLoop.expression);
+        }
+
 
         /* TODO Assignment 5b: Here some code which actually executes the
                 while loop must be added. This code should get the current value

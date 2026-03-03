@@ -5,33 +5,8 @@ import static dk.dtu.compute.course02324.mini_java.model.Operator.*;
 import static dk.dtu.compute.course02324.mini_java.utils.Shortcuts.*;
 
 import java.util.*;
+
 import static java.util.Map.entry;
-
-/*
-    ProgramTypeVisitor:
-
-     Map<Expression, Type> typeMapping:
-      Collects the type of each subexpression (bottom up).
-
-     Set<Var> variables:
-      Collects all variables that are declared in the program.
-
-     List<string> problems:
-    Collects problems with the program detected on the
-    way (each entry represents one specific problem).
-
-
-    Interesting methods for:
-     Assignment
-     Declaration
-     Variable
-     OperatorExpressio
-*/
-
-
-
-
-
 
 public class ProgramTypeVisitor extends ProgramVisitor {
 
@@ -48,7 +23,18 @@ public class ProgramTypeVisitor extends ProgramVisitor {
     final private Map<Operator,List<Type>> operatorTypes = Map.ofEntries(
             entry(PLUS2, List.of(INT, FLOAT)),
             entry(MINUS2, List.of(INT, FLOAT)),
-            entry(MULT, List.of(INT, FLOAT)));
+            entry(MULT, List.of(INT, FLOAT)),
+
+        //Operators added
+
+            entry(DIV, List.of(INT, FLOAT)),
+            entry(MOD, List.of(INT, FLOAT)),
+            entry(PLUS1, List.of(INT, FLOAT)),
+            entry(MINUS1, List.of(INT, FLOAT))
+
+    );
+
+
 
     final public Map<Expression, Type> typeMapping = new HashMap<>();
 

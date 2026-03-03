@@ -5,28 +5,6 @@ import dk.dtu.compute.course02324.mini_java.model.*;
 import java.util.HashMap;
 import java.util.Map;
 
-/*
-    ProgramSerializerVisitor
-
-     StringBuilder result:
-    Builder in which the serialization
-    (String representation) of each component of the abstract
-    syntax tree (AST) is gradually appended.
-
-     int indentLevel:
-    Represents the current level of indentation
-    of a statement (need for sub statements of while).
-
-
-    Interesting methods for:
-     Statement
-     Sequence
-     Declaration
-     WhileLoop
-
-
-*/
-
 public class ProgramSerializerVisitor extends ProgramVisitor  {
 
     private StringBuilder result = new StringBuilder();

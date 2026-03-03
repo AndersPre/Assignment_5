@@ -5,8 +5,6 @@ import dk.dtu.compute.course02324.mini_java.semantics.*;
 
 import static dk.dtu.compute.course02324.mini_java.utils.Shortcuts.*;
 import static dk.dtu.compute.course02324.mini_java.model.Operator.*;
-import static dk.dtu.compute.course02324.mini_java.utils.Shortcuts.Declaration;
-import static dk.dtu.compute.course02324.mini_java.utils.Shortcuts.Var;
 
 public class MiniJavaRun {
 
@@ -301,27 +299,6 @@ public class MiniJavaRun {
                                         ))
                 )
         );
-
-        Statement undefinedOperatorTest = Sequence(
-                Declaration(INT, Var("x"),
-                        OperatorExpression(Operator.DIV,
-                                Literal(10),
-                                Literal(3))
-                )
-        );
-        printTypeEvaluate(undefinedOperatorTest);
-
-        Statement missingFunctionTest =  Sequence(
-                Declaration(INT, Var("a"), Literal(2)),
-                Declaration(INT, Var("b"), Literal(3)),
-                Declaration(INT, Var("c"),
-                        OperatorExpression(MULT, Var("a"), Var("b"))
-                        ),
-                    PrintStatement("c = ", Var("c"))
-        );
-
-
-
     }
 
 }
