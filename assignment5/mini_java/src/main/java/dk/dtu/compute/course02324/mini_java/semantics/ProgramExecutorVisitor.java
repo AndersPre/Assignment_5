@@ -72,6 +72,8 @@ public class ProgramExecutorVisitor extends ProgramVisitor {
      *      (all operations with the respective types required in assignment must be defined above
      *      and added to the mapping below).
      */
+
+    
     final private Map<Operator, Map<Type, Function<List<Number>,Number>>> operatorFunctions = Map.ofEntries(
             entry(PLUS2, Map.ofEntries
                     (entry(INT, plus2int),
