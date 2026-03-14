@@ -13,8 +13,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * These are some basic tests of the MiniJava for computing the types and
@@ -341,6 +340,164 @@ public class TestMiniJava{
             }
         }
         assertEquals(0, variables.size(), "Some variables have not been evaluated");
+    }
+
+    /**
+     * Tests MULT operator for both int and float, PLUS2 with floats,
+     * and MOD with floats — covering all remaining lambda expressions.
+     */
+    @Test
+    public void testMultiplicationAndRemainingOperators() {
+        // Java reference computations
+        int a = 6 * 7;
+        float b = 2.5f * 3.0f;
+        float c = 2.5f + 3.5f;
+        float d = 10.0f % 3.0f;
+
+        Statement statement = Sequence(
+                Declaration(INT, Var("a"),
+                        OperatorExpression(MULT, Literal(6), Literal(7))
+                ),
+                Declaration(FLOAT, Var("b"),
+                        OperatorExpression(MULT, Literal(2.5f), Literal(3.0f))
+                ),
+                Declaration(FLOAT, Var("c"),
+                        OperatorExpression(PLUS2, Literal(2.5f), Literal(3.5f))
+                ),
+                Declaration(FLOAT, Var("d"),
+                        OperatorExpression(MOD, Literal(10.0f), Literal(3.0f))
+                )
+        );
+
+        ptv.visit(statement);
+        assertTrue(ptv.problems.isEmpty(), "No type problems expected: " + ptv.problems);
+
+        pev.visit(statement);
+
+        for (Var var : ptv.variables) {
+            Number val = pev.values.get(var);
+            switch (var.name) {
+                case "a" -> assertEquals(a, val, "6 * 7 should be " + a);
+                case "b" -> assertEquals(b, val, "2.5f * 3.0f should be " + b);
+                case "c" -> assertEquals(c, val, "2.5f + 3.5f should be " + c);
+                case "d" -> assertEquals(d, val, "10.0f % 3.0f should be " + d);
+                default -> fail("Unexpected variable: " + var.name);
+            }
+        }
+    }
+
+    /**
+     * Tests that a WhileLoop with a float condition is rejected by the type checker.
+     */
+    @Test
+    public void testWhileLoopWithFloatConditionIsRejected() {
+        Statement statement = Sequence(
+                Declaration(FLOAT, Var("x"), Literal(5.0f)),
+                WhileLoop(
+                        Var("x"),
+                        Assignment(Var("x"),
+                                OperatorExpression(MINUS2, Var("x"), Literal(1.0f))
+                        )
+                )
+        );
+
+        ptv.visit(statement);
+        assertFalse(ptv.problems.isEmpty(), "Float condition in while loop should be rejected");
+    }
+
+    /**
+     * Tests type mismatch between operands of an operator (int + float).
+     */
+    @Test
+    public void testOperandTypeMismatch() {
+        Statement statement = Sequence(
+                Declaration(INT, Var("a"), Literal(1)),
+                Declaration(FLOAT, Var("b"), Literal(2.0f)),
+                Declaration(INT, Var("c"),
+                        OperatorExpression(PLUS2, Var("a"), Var("b"))
+                )
+        );
+
+        ptv.visit(statement);
+        assertFalse(ptv.problems.isEmpty(), "Mixing int and float operands should produce a type error");
+    }
+
+    /**
+     * Tests assignment type mismatch (assigning float expression to int variable).
+     */
+    @Test
+    public void testAssignmentTypeMismatch() {
+        Statement statement = Sequence(
+                Declaration(INT, Var("x"), Literal(0)),
+                Assignment(Var("x"), Literal(1.5f))
+        );
+
+        ptv.visit(statement);
+        assertFalse(ptv.problems.isEmpty(), "Assigning float to int variable should be a type error");
+    }
+
+    /**
+     * Tests declaration type mismatch (declaring int variable with float initializer).
+     */
+    @Test
+    public void testDeclarationTypeMismatch() {
+        Statement statement = Sequence(
+                Declaration(INT, Var("x"), Literal(3.14f))
+        );
+
+        ptv.visit(statement);
+        assertFalse(ptv.problems.isEmpty(), "Declaring int with float initializer should be a type error");
+    }
+
+    /**
+     * Tests that a while loop executes zero times when condition is initially negative.
+     */
+    @Test
+    public void testWhileLoopZeroIterations() {
+        int x = -1;
+
+        Statement statement = Sequence(
+                Declaration(INT, Var("x"), Literal(-1)),
+                WhileLoop(
+                        Var("x"),
+                        Assignment(Var("x"),
+                                OperatorExpression(MINUS2, Var("x"), Literal(1))
+                        )
+                )
+        );
+
+        ptv.visit(statement);
+        assertTrue(ptv.problems.isEmpty(), "No type problems expected");
+
+        pev.visit(statement);
+        for (Var var : ptv.variables) {
+            if (var.name.equals("x")) {
+                assertEquals(x, pev.values.get(var), "x should remain " + x + " (loop never entered)");
+            }
+        }
+    }
+
+    /**
+     * Tests declaration without initializer followed by assignment.
+     */
+    @Test
+    public void testDeclarationWithoutInitializer() {
+        int r = 10;
+
+        Statement statement = Sequence(
+                Declaration(INT, Var("r")),
+                Assignment(Var("r"), Literal(10))
+        );
+
+        ptv.visit(statement);
+        assertTrue(ptv.problems.isEmpty(), "No type problems expected");
+
+        pev.visit(statement);
+        for (Var var : ptv.variables) {
+            if (var.name.equals("r")) {
+                assertEquals(r, pev.values.get(var));
+            }
+        }
     }
 
 }
